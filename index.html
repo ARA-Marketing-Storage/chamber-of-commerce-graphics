@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chamber of Commerce Graphics — ARA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:  #0C1B2A;
+      --blue:  #518BC9;
+      --green: #6EC17C;
+      --white: #FFFFFF;
+      --surface: #111e2c;
+      --border: rgba(81,139,201,0.18);
+    }
+
+    body {
+      background: #070f18;
+      color: var(--white);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 40px 32px 64px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-left h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--white);
+    }
+
+    .header-left p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .btn-export-all {
+      background: var(--green);
+      color: var(--navy);
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .btn-export-all:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-export-all:active { transform: translateY(0); }
+    .btn-export-all:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .status-bar {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 8px;
+      text-align: right;
+    }
+    .status-bar .ok { color: var(--green); }
+    .status-bar .missing { color: #f87171; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: rgba(81,139,201,0.45); }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-city {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-pill.ok  { background: rgba(110,193,124,0.15); color: var(--green); }
+    .badge-pill.missing { background: rgba(248,113,113,0.12); color: #f87171; }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+      cursor: pointer;
+    }
+    canvas:hover { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+    .btn-single {
+      background: rgba(81,139,201,0.12);
+      color: var(--blue);
+      border: 1px solid rgba(81,139,201,0.25);
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 14px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+    .btn-single:hover { background: rgba(81,139,201,0.22); }
+
+    .progress-wrap {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .progress-wrap.visible { display: flex; }
+    .progress-bar-outer {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+    .progress-text { font-size: 11px; color: rgba(255,255,255,0.45); white-space: nowrap; }
+
+    @media (max-width: 600px) {
+      body { padding: 20px 16px 48px; }
+      header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Chamber of Commerce Graphics</h1>
+    <p>10 cities · 720 × 720 px · PNG export · Angel Reyes &amp; Associates</p>
+  </div>
+  <div style="text-align:right;">
+    <button class="btn-export-all" id="exportAll" onclick="exportAll()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Export All (10 PNGs)
+    </button>
+    <div class="status-bar" id="statusBar">Loading assets…</div>
+  </div>
+</header>
+
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+  <span class="progress-text" id="progressText">0 / 10</span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<!-- Hidden canvas used for full-res rendering -->
+<canvas id="offscreen" width="720" height="720" style="display:none;"></canvas>
+
+<script>
+const CITIES = [
+  { name: "College Station", file: "college-station", ext: "webp", photo: "photos/AttorneyClientConferenceComfortingClientAngelClient.jpg"      },
+  { name: "El Paso",         file: "el-paso",         ext: "png",  photo: "photos/photo-2.jpg"                                                  },
+  { name: "Fort Worth",      file: "fort-worth",      ext: "webp", photo: "photos/photo-3.jpg"                                                  },
+  { name: "Garland",         file: "garland",         ext: "webp", photo: "photos/AttorneyOfficeClientLeavingOfficeHappywithCheckAngel.jpg"      },
+  { name: "Houston West",    file: "houston-west",    ext: "webp", photo: "photos/AttorneyOfficeHandshakewithClientAngel.jpg"                    },
+  { name: "Lewisville",      file: "lewisville",      ext: "webp", photo: "photos/AttorneyOfficeSigningContractJuliana.jpg"                      },
+  { name: "Lubbock",         file: "lubbock",         ext: "webp", photo: "photos/AttorneyOutdoorTalkingonPhoneRyan.jpg"                         },
+  { name: "Pearland",        file: "pearland",        ext: "webp", photo: "photos/AttorneysOfficeHandshakeMaria.jpg"                             },
+  { name: "Plano",           file: "plano",           ext: "webp", photo: "photos/photo-6.jpg"                                                  },
+  { name: "Odessa",          file: "odessa",          ext: "png",  photo: "photos/photo-10.jpg"                                                 },
+];
+
+const BRAND = { navy: '#0C1B2A', blue: '#518BC9', green: '#6EC17C' };
+
+let sharedAssets = { logo: null, texTR: null, texBL: null };
+let badgeImages  = {};   // city.file -> HTMLImageElement | null
+let cityPhotos   = {};   // city.file -> HTMLImageElement | null
+
+// ─── image loader ───────────────────────────────────────────────────────────
+function loadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload  = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+// ─── canvas drawing ──────────────────────────────────────────────────────────
+function drawGraphic(canvas, city) {
+  const ctx = canvas.getContext('2d');
+  const W = 720, H = 720;
+
+  // ── 1. navy base ──
+  ctx.fillStyle = BRAND.navy;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── 2. photo — full-bleed 720×720, anchored top ──
+  const photo = cityPhotos[city.file] || null;
+  if (photo) {
+    const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
+    const pw = photo.naturalWidth  * scale;
+    const ph = photo.naturalHeight * scale;
+    ctx.drawImage(photo, (W - pw) / 2, 0, pw, ph);
+  }
+
+  // ── 3. bottom gradient overlay — smooth, cinematic ──
+  const bot = ctx.createLinearGradient(0, H * 0.30, 0, H);
+  bot.addColorStop(0,    'rgba(12,27,42,0)');
+  bot.addColorStop(0.22, 'rgba(12,27,42,0.20)');
+  bot.addColorStop(0.48, 'rgba(12,27,42,0.72)');
+  bot.addColorStop(0.70, 'rgba(12,27,42,0.92)');
+  bot.addColorStop(1,    'rgba(12,27,42,1)');
+  ctx.fillStyle = bot;
+  ctx.fillRect(0, H * 0.30, W, H * 0.70);
+
+  // ── 4. top vignette ──
+  const top = ctx.createLinearGradient(0, 0, 0, 90);
+  top.addColorStop(0, 'rgba(12,27,42,0.55)');
+  top.addColorStop(1, 'rgba(12,27,42,0)');
+  ctx.fillStyle = top;
+  ctx.fillRect(0, 0, W, 90);
+
+  // ── 5. side vignettes ──
+  const vL = ctx.createLinearGradient(0, 0, 90, 0);
+  vL.addColorStop(0, 'rgba(12,27,42,0.35)'); vL.addColorStop(1, 'rgba(12,27,42,0)');
+  ctx.fillStyle = vL; ctx.fillRect(0, 0, 90, H);
+
+  const vR = ctx.createLinearGradient(W - 90, 0, W, 0);
+  vR.addColorStop(0, 'rgba(12,27,42,0)'); vR.addColorStop(1, 'rgba(12,27,42,0.35)');
+  ctx.fillStyle = vR; ctx.fillRect(W - 90, 0, 90, H);
+
+  // ── 6. brand blue corner glows ──
+  const gBL = ctx.createRadialGradient(0, H, 0, 0, H, 380);
+  gBL.addColorStop(0, 'rgba(81,139,201,0.28)'); gBL.addColorStop(1, 'rgba(81,139,201,0)');
+  ctx.fillStyle = gBL; ctx.fillRect(0, H * 0.5, W * 0.5, H * 0.5);
+
+  const gBR = ctx.createRadialGradient(W, H, 0, W, H, 380);
+  gBR.addColorStop(0, 'rgba(81,139,201,0.20)'); gBR.addColorStop(1, 'rgba(81,139,201,0)');
+  ctx.fillStyle = gBR; ctx.fillRect(W * 0.5, H * 0.5, W * 0.5, H * 0.5);
+
+  // ── LAYOUT: fixed bottom row height, text fills above ──────────────────
+  const BOTTOM_PAD = 24;
+  const ROW_H      = 90;   // height of the logo/badge row at bottom
+  const ROW_Y      = H - BOTTOM_PAD - ROW_H;   // top of bottom row
+  const EDGE       = 52;
+
+  // ── 7. MAIN TEXT (3 lines, all-caps, centered) ────────────────────────
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'alphabetic';
+
+  const labelSize   = 28;
+  const chamberSize = 28;
+  const CAP         = 0.72;   // Montserrat cap-height as fraction of font-size
+
+  // city: size to fill ~72% of width — grow short names, shrink long ones
+  const MAX_W      = W - 80;
+  const TARGET_MIN = MAX_W * 0.72;
+  let citySize = 82;
+  ctx.font = `900 ${citySize}px Montserrat, sans-serif`;
+
+  // shrink if overflows
+  while (ctx.measureText(city.name.toUpperCase()).width > MAX_W && citySize > 38) {
+    citySize -= 2;
+    ctx.font  = `900 ${citySize}px Montserrat, sans-serif`;
+  }
+  // grow if too narrow (short names like EL PASO, PLANO, LUBBOCK)
+  while (ctx.measureText(city.name.toUpperCase()).width < TARGET_MIN && citySize < 120) {
+    citySize += 2;
+    ctx.font  = `900 ${citySize}px Montserrat, sans-serif`;
+  }
+  // final safety — ensure no overflow after grow
+  while (ctx.measureText(city.name.toUpperCase()).width > MAX_W && citySize > 38) {
+    citySize -= 2;
+    ctx.font  = `900 ${citySize}px Montserrat, sans-serif`;
+  }
+
+  // Equal VISUAL white-space above and below city name.
+  const GAP_BOT  = 16;
+  const GAP_TOP  = Math.max(0, GAP_BOT + (chamberSize - citySize) * (1 - CAP));
+
+  const blockH   = labelSize + GAP_TOP + citySize + GAP_BOT + chamberSize;
+
+  // text zone: starts at 61%, ends 14px above the logo row
+  const textZoneT = H * 0.61;
+  const textZoneB = ROW_Y - 14;
+  const available = textZoneB - textZoneT;
+
+  // if block taller than zone, shrink city font until it fits
+  while (labelSize + Math.max(0, GAP_BOT + (chamberSize - citySize) * (1 - CAP)) + citySize + GAP_BOT + chamberSize > available && citySize > 36) {
+    citySize -= 2;
+    ctx.font  = `900 ${citySize}px Montserrat, sans-serif`;
+  }
+
+  // recompute gaps & positions after possible shrink
+  const gTop   = Math.max(0, GAP_BOT + (chamberSize - citySize) * (1 - CAP));
+  const bH     = labelSize + gTop + citySize + GAP_BOT + chamberSize;
+  const bTop   = textZoneT + (available - bH) / 2;
+
+  const y1 = bTop   + labelSize;
+  const y2 = y1     + gTop      + citySize;
+  const y3 = y2     + GAP_BOT   + chamberSize;
+
+  // "PROUD MEMBERS OF THE"
+  ctx.fillStyle = 'rgba(255,255,255,0.90)';
+  ctx.font      = `700 ${labelSize}px Montserrat, sans-serif`;
+  ctx.fillText('PROUD MEMBERS OF THE', W / 2, y1);
+
+  // CITY NAME — icy blue + glow (two passes for depth)
+  ctx.save();
+  ctx.font        = `900 ${citySize}px Montserrat, sans-serif`;
+  ctx.shadowColor = '#5A9FD4';
+  ctx.shadowBlur  = 32;
+  ctx.fillStyle   = '#C8E4FA';
+  ctx.fillText(city.name.toUpperCase(), W / 2, y2);
+  ctx.shadowBlur  = 12;
+  ctx.fillText(city.name.toUpperCase(), W / 2, y2);
+  ctx.restore();
+
+  // "CHAMBER OF COMMERCE"
+  ctx.fillStyle = 'rgba(255,255,255,0.90)';
+  ctx.font      = `700 ${chamberSize}px Montserrat, sans-serif`;
+  ctx.fillText('CHAMBER OF COMMERCE', W / 2, y3);
+
+  // ── 8. BOTTOM ROW: vertical ARA logo (left) + badge (right) ──────────
+  // vertical logo — bottom-left
+  if (sharedAssets.logoV) {
+    const lv = sharedAssets.logoV;
+    const lH = ROW_H;
+    const lW = lv.naturalWidth * (lH / lv.naturalHeight);
+    const lY = ROW_Y + (ROW_H - lH) / 2;
+    ctx.globalAlpha = 0.90;
+    ctx.drawImage(lv, EDGE, lY, lW, lH);
+    ctx.globalAlpha = 1;
+  }
+
+  // badge — bottom-right, with white pill (capped in both dimensions)
+  const badge = badgeImages[city.file] || null;
+  if (badge) {
+    const bw    = badge.naturalWidth  || badge.width;
+    const bh    = badge.naturalHeight || badge.height;
+    const ratio = bw / bh;
+    // constrain: max height = ROW_H, max width = 150px
+    let dh = ROW_H;
+    let dw = dh * ratio;
+    if (dw > 150) { dw = 150; dh = dw / ratio; }
+    const PAD   = 10;
+    const cardW = dw + PAD * 2;
+    const cardH = dh + PAD * 2;
+    const cardX = W - EDGE - cardW;
+    const cardY = ROW_Y + (ROW_H - cardH) / 2;
+    const r     = 10;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 3;
+    ctx.beginPath();
+    ctx.moveTo(cardX + r, cardY);
+    ctx.arcTo(cardX + cardW, cardY,           cardX + cardW, cardY + cardH, r);
+    ctx.arcTo(cardX + cardW, cardY + cardH,   cardX,         cardY + cardH, r);
+    ctx.arcTo(cardX,         cardY + cardH,   cardX,         cardY,         r);
+    ctx.arcTo(cardX,         cardY,           cardX + cardW, cardY,         r);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.97)';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.drawImage(badge, cardX + PAD, cardY + PAD, dw, dh);
+  }
+}
+
+// ─── build UI cards ──────────────────────────────────────────────────────────
+function buildCards() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  CITIES.forEach(city => {
+    const badgeLoaded = badgeImages[city.file] !== null && badgeImages[city.file] !== undefined;
+    const badgeFound  = badgeImages[city.file] instanceof HTMLImageElement;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-city">${city.name}</span>
+        <span class="badge-pill ${badgeFound ? 'ok' : 'missing'}">
+          ${badgeFound ? '✓ Badge loaded' : '⚠ Badge missing'}
+        </span>
+      </div>
+      <canvas id="canvas-${city.file}" width="720" height="720"
+              title="Click to download"
+              onclick="exportSingle('${city.file}', '${city.name}')"></canvas>
+      <button class="btn-single" onclick="exportSingle('${city.file}', '${city.name}')">
+        Download PNG — ${city.name}
+      </button>
+    `;
+    grid.appendChild(card);
+
+    // render preview
+    const cvs = document.getElementById(`canvas-${city.file}`);
+    drawGraphic(cvs, city);
+  });
+}
+
+// ─── export helpers ──────────────────────────────────────────────────────────
+function exportSingle(file, name) {
+  const offscreen = document.getElementById('offscreen');
+  const city = CITIES.find(c => c.file === file);
+  drawGraphic(offscreen, city);
+  const link = document.createElement('a');
+  link.download = `chamber-${file}.png`;
+  link.href = offscreen.toDataURL('image/png');
+  link.click();
+}
+
+async function exportAll() {
+  const btn  = document.getElementById('exportAll');
+  const wrap = document.getElementById('progressWrap');
+  const bar  = document.getElementById('progressBar');
+  const txt  = document.getElementById('progressText');
+
+  btn.disabled = true;
+  wrap.classList.add('visible');
+
+  const offscreen = document.getElementById('offscreen');
+
+  for (let i = 0; i < CITIES.length; i++) {
+    const city = CITIES[i];
+    drawGraphic(offscreen, city);
+
+    await new Promise(resolve => setTimeout(resolve, 80)); // let canvas settle
+
+    const link = document.createElement('a');
+    link.download = `chamber-${city.file}.png`;
+    link.href = offscreen.toDataURL('image/png');
+    link.click();
+
+    bar.style.width = `${((i + 1) / CITIES.length) * 100}%`;
+    txt.textContent = `${i + 1} / ${CITIES.length}`;
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
+  btn.disabled = false;
+  setTimeout(() => {
+    wrap.classList.remove('visible');
+    bar.style.width = '0%';
+  }, 2000);
+}
+
+// ─── init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await document.fonts.ready;
+
+  const [logo, logoV, texTR, texBL] = await Promise.all([
+    loadImage('assets/ara-logo-white.png'),
+    loadImage('assets/ara-vertical-white.png'),
+    loadImage('assets/texture-top-right.png'),
+    loadImage('assets/texture-bottom-left.png'),
+  ]);
+  sharedAssets = { logo, logoV, texTR, texBL };
+
+  // load each city's photo
+  await Promise.all(CITIES.map(city =>
+    loadImage(city.photo).then(img => { cityPhotos[city.file] = img; })
+  ));
+
+  const badgeLoads = CITIES.map(city =>
+    loadImage(`badges/${city.file}.${city.ext}`).then(img => {
+      badgeImages[city.file] = img;
+    })
+  );
+  await Promise.all(badgeLoads);
+
+  const loaded  = CITIES.filter(c => badgeImages[c.file] instanceof HTMLImageElement).length;
+  const missing = CITIES.length - loaded;
+  const bar = document.getElementById('statusBar');
+  bar.innerHTML = missing === 0
+    ? `<span class="ok">✓ All 10 badges loaded</span>`
+    : `<span class="ok">${loaded} badges loaded</span> · <span class="missing">${missing} missing — add to badges/ folder</span>`;
+
+  buildCards();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "chamber-of-commerce-graphics",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ARA Chamber of Commerce membership graphics generator",
+  "scripts": {
+    "serve": "node serve.mjs",
+    "screenshot": "node screenshot.mjs http://localhost:3030/"
+  },
+  "dependencies": {
+    "puppeteer": "^25.1.0"
+  }
+}
