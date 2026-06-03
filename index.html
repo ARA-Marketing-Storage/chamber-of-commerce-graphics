@@ -249,13 +249,9 @@
 <header>
   <div class="header-left">
     <h1>Chamber of Commerce Graphics</h1>
-    <p>10 cities · 720 × 720 px · PNG export · Angel Reyes &amp; Associates</p>
+    <p>720 × 720 px · PNG export · Angel Reyes &amp; Associates</p>
   </div>
   <div style="text-align:right;">
-    <button class="btn-export-all" id="exportAll" onclick="exportAll()">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Export All (10 PNGs)
-    </button>
     <div class="status-bar" id="statusBar">Loading assets…</div>
   </div>
 </header>
@@ -269,31 +265,31 @@
   <div class="custom-form">
     <div>
       <div class="custom-form-title">Custom Generator</div>
-      <div class="custom-form-sub">Genera un arte con cualquier badge y foto — sin agregar al listado</div>
+      <div class="custom-form-sub">Generate artwork with any badge and photo — without adding to the city list</div>
     </div>
     <div class="field">
-      <label>Nombre de la ciudad</label>
-      <input type="text" id="customCity" placeholder="ej. Galveston" oninput="renderCustomPreview()">
+      <label>City Name</label>
+      <input type="text" id="customCity" placeholder="e.g. Galveston" oninput="renderCustomPreview()">
     </div>
     <div class="field">
       <label>Badge</label>
       <div class="upload-zone" id="badgeZone">
         <span class="upload-icon">🏅</span>
-        <span class="upload-text" id="badgeZoneText">Click para seleccionar o arrastra aquí</span>
+        <span class="upload-text" id="badgeZoneText">Click to select or drag here</span>
         <input type="file" accept="image/*" id="badgeFile" onchange="onBadgeFile(this)">
       </div>
     </div>
     <div class="field">
-      <label>Foto de fondo</label>
+      <label>Background Photo</label>
       <div class="upload-zone" id="photoZone">
         <span class="upload-icon">📷</span>
-        <span class="upload-text" id="photoZoneText">Click para seleccionar o arrastra aquí</span>
+        <span class="upload-text" id="photoZoneText">Click to select or drag here</span>
         <input type="file" accept="image/*" id="photoFile" onchange="onPhotoFile(this)">
       </div>
     </div>
     <button class="btn-export-all" id="customDownload" onclick="downloadCustomPNG()" disabled style="opacity:0.4;cursor:not-allowed;">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Descargar PNG
+      Download PNG
     </button>
   </div>
   <div class="custom-preview">
@@ -626,7 +622,7 @@ async function init() {
   const missing = CITIES.length - loaded;
   const bar = document.getElementById('statusBar');
   bar.innerHTML = missing === 0
-    ? `<span class="ok">✓ All 10 badges loaded</span>`
+    ? `<span class="ok">✓ All ${loaded} badges loaded</span>`
     : `<span class="ok">${loaded} badges loaded</span> · <span class="missing">${missing} missing — add to badges/ folder</span>`;
 
   buildCards();
