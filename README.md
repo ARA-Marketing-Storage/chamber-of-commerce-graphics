@@ -6,7 +6,7 @@ Generates 720×720 px membership graphics for Angel Reyes & Associates Google Bu
 
 **No installation needed** — just open the link in any browser:
 
-👉 **https://juanbrea-git.github.io/chamber-of-commerce-graphics/**
+👉 **https://ara-marketing-storage.github.io/chamber-of-commerce-graphics/**
 
 ### Generate a custom graphic
 
