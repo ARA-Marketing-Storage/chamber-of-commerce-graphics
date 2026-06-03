@@ -1,17 +1,24 @@
 # Chamber of Commerce Graphics — ARA
 
-Generates 720×720 px membership graphics for Angel Reyes & Associates Google Business Profiles. One graphic per Chamber of Commerce city, featuring a team photo, the chamber name, and both the ARA logo and chamber badge.
+Generates 720×720 px membership graphics for Angel Reyes & Associates Google Business Profiles.
 
-## Quick Start
+## How to Use
 
-```bash
-# 1. Start the local server
-npm run serve          # → http://localhost:3030
+**No installation needed** — just open the link in any browser:
 
-# 2. Open in browser, click "Export All (10 PNGs)"
-```
+👉 **https://juanbrea-git.github.io/chamber-of-commerce-graphics/**
 
-Exported files are downloaded to your browser's Downloads folder.
+### Generate a custom graphic
+
+- Enter the city name
+- Upload the chamber badge (PNG or WebP)
+- Upload a background team photo (JPG or PNG)
+- Preview updates live — click **Download PNG** when ready
+
+### Browse existing cities
+
+- Scroll down to see all pre-built city graphics
+- Click any card or **Download PNG** under it to save that city's graphic
 
 ## Adding a New City
 
