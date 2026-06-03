@@ -169,6 +169,75 @@
     }
     .progress-text { font-size: 11px; color: rgba(255,255,255,0.45); white-space: nowrap; }
 
+    /* ── Custom Generator ──────────────────────────────────────────────── */
+    .custom-generator {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .custom-form { display: flex; flex-direction: column; gap: 16px; }
+    .custom-form-title { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 2px; }
+    .custom-form-sub   { font-size: 12px; color: rgba(255,255,255,0.38); }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 6px;
+    }
+    .field input[type="text"] {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input[type="text"]:focus { border-color: var(--blue); }
+    .field input[type="text"]::placeholder { color: rgba(255,255,255,0.22); }
+    .upload-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-zone:hover { border-color: var(--blue); background: rgba(81,139,201,0.05); }
+    .upload-zone.loaded { border-style: solid; border-color: var(--green); }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 18px; flex-shrink: 0; }
+    .upload-text { font-size: 12px; color: rgba(255,255,255,0.45); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .upload-zone.loaded .upload-text { color: var(--green); }
+    .custom-preview canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      background: var(--navy);
+      display: block;
+    }
+
+    @media (max-width: 700px) {
+      .custom-generator { grid-template-columns: 1fr; }
+    }
     @media (max-width: 600px) {
       body { padding: 20px 16px 48px; }
       header { flex-direction: column; align-items: flex-start; gap: 16px; }
@@ -196,6 +265,42 @@
   <span class="progress-text" id="progressText">0 / 10</span>
 </div>
 
+<div class="custom-generator">
+  <div class="custom-form">
+    <div>
+      <div class="custom-form-title">Custom Generator</div>
+      <div class="custom-form-sub">Genera un arte con cualquier badge y foto — sin agregar al listado</div>
+    </div>
+    <div class="field">
+      <label>Nombre de la ciudad</label>
+      <input type="text" id="customCity" placeholder="ej. Galveston" oninput="renderCustomPreview()">
+    </div>
+    <div class="field">
+      <label>Badge</label>
+      <div class="upload-zone" id="badgeZone">
+        <span class="upload-icon">🏅</span>
+        <span class="upload-text" id="badgeZoneText">Click para seleccionar o arrastra aquí</span>
+        <input type="file" accept="image/*" id="badgeFile" onchange="onBadgeFile(this)">
+      </div>
+    </div>
+    <div class="field">
+      <label>Foto de fondo</label>
+      <div class="upload-zone" id="photoZone">
+        <span class="upload-icon">📷</span>
+        <span class="upload-text" id="photoZoneText">Click para seleccionar o arrastra aquí</span>
+        <input type="file" accept="image/*" id="photoFile" onchange="onPhotoFile(this)">
+      </div>
+    </div>
+    <button class="btn-export-all" id="customDownload" onclick="downloadCustomPNG()" disabled style="opacity:0.4;cursor:not-allowed;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Descargar PNG
+    </button>
+  </div>
+  <div class="custom-preview">
+    <canvas id="customCanvas" width="720" height="720"></canvas>
+  </div>
+</div>
+
 <div class="grid" id="grid"></div>
 
 <!-- Hidden canvas used for full-res rendering -->
@@ -206,6 +311,7 @@ const CITIES = [
   { name: "College Station", file: "college-station", ext: "webp", photo: "photos/AttorneyClientConferenceComfortingClientAngelClient.jpg"      },
   { name: "El Paso",         file: "el-paso",         ext: "png",  photo: "photos/photo-2.jpg"                                                  },
   { name: "Fort Worth",      file: "fort-worth",      ext: "webp", photo: "photos/photo-3.jpg"                                                  },
+  { name: "Galveston",       file: "galveston",       ext: "webp", photo: "photos/AttorneyOfficeSmilingwithClientJuliana.jpg"                   },
   { name: "Garland",         file: "garland",         ext: "webp", photo: "photos/AttorneyOfficeClientLeavingOfficeHappywithCheckAngel.jpg"      },
   { name: "Houston West",    file: "houston-west",    ext: "webp", photo: "photos/AttorneyOfficeHandshakewithClientAngel.jpg"                    },
   { name: "Lewisville",      file: "lewisville",      ext: "webp", photo: "photos/AttorneyOfficeSigningContractJuliana.jpg"                      },
@@ -232,7 +338,7 @@ function loadImage(src) {
 }
 
 // ─── canvas drawing ──────────────────────────────────────────────────────────
-function drawGraphic(canvas, city) {
+function drawGraphic(canvas, city, imgs = {}) {
   const ctx = canvas.getContext('2d');
   const W = 720, H = 720;
 
@@ -241,7 +347,7 @@ function drawGraphic(canvas, city) {
   ctx.fillRect(0, 0, W, H);
 
   // ── 2. photo — full-bleed 720×720, anchored top ──
-  const photo = cityPhotos[city.file] || null;
+  const photo = imgs.photo || cityPhotos[city.file] || null;
   if (photo) {
     const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
     const pw = photo.naturalWidth  * scale;
@@ -380,7 +486,7 @@ function drawGraphic(canvas, city) {
   }
 
   // badge — bottom-right, with white pill (capped in both dimensions)
-  const badge = badgeImages[city.file] || null;
+  const badge = imgs.badge || badgeImages[city.file] || null;
   if (badge) {
     const bw    = badge.naturalWidth  || badge.width;
     const bh    = badge.naturalHeight || badge.height;
@@ -527,6 +633,64 @@ async function init() {
 }
 
 init();
+
+// ─── custom generator ────────────────────────────────────────────────────────
+const customImgs = { photo: null, badge: null };
+
+function loadFileAsImage(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload  = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function onBadgeFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  customImgs.badge = await loadFileAsImage(file);
+  document.getElementById('badgeZoneText').textContent = file.name;
+  document.getElementById('badgeZone').classList.add('loaded');
+  renderCustomPreview();
+}
+
+async function onPhotoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  customImgs.photo = await loadFileAsImage(file);
+  document.getElementById('photoZoneText').textContent = file.name;
+  document.getElementById('photoZone').classList.add('loaded');
+  renderCustomPreview();
+}
+
+function renderCustomPreview() {
+  const name  = document.getElementById('customCity').value.trim();
+  const btn   = document.getElementById('customDownload');
+  const ready = name && customImgs.photo && customImgs.badge;
+
+  btn.disabled      = !ready;
+  btn.style.opacity = ready ? '1' : '0.4';
+  btn.style.cursor  = ready ? 'pointer' : 'not-allowed';
+
+  const canvas = document.getElementById('customCanvas');
+  const city   = { name: name || ' ', file: '__custom__' };
+  drawGraphic(canvas, city, customImgs);
+}
+
+function downloadCustomPNG() {
+  const name = document.getElementById('customCity').value.trim();
+  if (!name || !customImgs.photo || !customImgs.badge) return;
+
+  const offscreen = document.getElementById('offscreen');
+  drawGraphic(offscreen, { name, file: '__custom__' }, customImgs);
+
+  const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const link = document.createElement('a');
+  link.download = `chamber-${slug}.png`;
+  link.href = offscreen.toDataURL('image/png');
+  link.click();
+}
 </script>
 </body>
 </html>
