@@ -70,104 +70,12 @@
     .btn-export-all:active { transform: translateY(0); }
     .btn-export-all:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .status-bar {
-      font-size: 12px;
-      color: rgba(255,255,255,0.4);
-      margin-top: 8px;
-      text-align: right;
-    }
-    .status-bar .ok { color: var(--green); }
-    .status-bar .missing { color: #f87171; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: border-color 0.2s;
-    }
-    .card:hover { border-color: rgba(81,139,201,0.45); }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card-city {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--white);
-      letter-spacing: 0.02em;
-    }
-
-    .badge-pill {
-      font-size: 11px;
-      font-weight: 500;
-      padding: 3px 8px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .badge-pill.ok  { background: rgba(110,193,124,0.15); color: var(--green); }
-    .badge-pill.missing { background: rgba(248,113,113,0.12); color: #f87171; }
-
     canvas {
       width: 100%;
       height: auto;
       border-radius: 8px;
       display: block;
-      cursor: pointer;
     }
-    canvas:hover { outline: 2px solid var(--blue); outline-offset: 2px; }
-
-    .btn-single {
-      background: rgba(81,139,201,0.12);
-      color: var(--blue);
-      border: 1px solid rgba(81,139,201,0.25);
-      border-radius: 6px;
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      padding: 7px 14px;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.15s;
-    }
-    .btn-single:hover { background: rgba(81,139,201,0.22); }
-
-    .progress-wrap {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      margin-top: 6px;
-    }
-    .progress-wrap.visible { display: flex; }
-    .progress-bar-outer {
-      flex: 1;
-      height: 4px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .progress-bar-inner {
-      height: 100%;
-      background: var(--green);
-      border-radius: 2px;
-      transition: width 0.3s;
-      width: 0%;
-    }
-    .progress-text { font-size: 11px; color: rgba(255,255,255,0.45); white-space: nowrap; }
 
     /* ── Custom Generator ──────────────────────────────────────────────── */
     .custom-generator {
@@ -251,15 +159,7 @@
     <h1>Chamber of Commerce Graphics</h1>
     <p>720 × 720 px · PNG export · Angel Reyes &amp; Associates</p>
   </div>
-  <div style="text-align:right;">
-    <div class="status-bar" id="statusBar">Loading assets…</div>
-  </div>
 </header>
-
-<div class="progress-wrap" id="progressWrap">
-  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
-  <span class="progress-text" id="progressText">0 / 10</span>
-</div>
 
 <div class="custom-generator">
   <div class="custom-form">
@@ -297,31 +197,13 @@
   </div>
 </div>
 
-<div class="grid" id="grid"></div>
-
 <!-- Hidden canvas used for full-res rendering -->
 <canvas id="offscreen" width="720" height="720" style="display:none;"></canvas>
 
 <script>
-const CITIES = [
-  { name: "College Station", file: "college-station", ext: "webp", photo: "photos/AttorneyClientConferenceComfortingClientAngelClient.jpg"      },
-  { name: "El Paso",         file: "el-paso",         ext: "png",  photo: "photos/photo-2.jpg"                                                  },
-  { name: "Fort Worth",      file: "fort-worth",      ext: "webp", photo: "photos/photo-3.jpg"                                                  },
-  { name: "Galveston",       file: "galveston",       ext: "webp", photo: "photos/AttorneyOfficeSmilingwithClientJuliana.jpg"                   },
-  { name: "Garland",         file: "garland",         ext: "webp", photo: "photos/AttorneyOfficeClientLeavingOfficeHappywithCheckAngel.jpg"      },
-  { name: "Houston West",    file: "houston-west",    ext: "webp", photo: "photos/AttorneyOfficeHandshakewithClientAngel.jpg"                    },
-  { name: "Lewisville",      file: "lewisville",      ext: "webp", photo: "photos/AttorneyOfficeSigningContractJuliana.jpg"                      },
-  { name: "Lubbock",         file: "lubbock",         ext: "webp", photo: "photos/AttorneyOutdoorTalkingonPhoneRyan.jpg"                         },
-  { name: "Pearland",        file: "pearland",        ext: "webp", photo: "photos/AttorneysOfficeHandshakeMaria.jpg"                             },
-  { name: "Plano",           file: "plano",           ext: "webp", photo: "photos/photo-6.jpg"                                                  },
-  { name: "Odessa",          file: "odessa",          ext: "png",  photo: "photos/photo-10.jpg"                                                 },
-];
-
 const BRAND = { navy: '#0C1B2A', blue: '#518BC9', green: '#6EC17C' };
 
-let sharedAssets = { logo: null, texTR: null, texBL: null };
-let badgeImages  = {};   // city.file -> HTMLImageElement | null
-let cityPhotos   = {};   // city.file -> HTMLImageElement | null
+let sharedAssets = { logoV: null };
 
 // ─── image loader ───────────────────────────────────────────────────────────
 function loadImage(src) {
@@ -343,7 +225,7 @@ function drawGraphic(canvas, city, imgs = {}) {
   ctx.fillRect(0, 0, W, H);
 
   // ── 2. photo — full-bleed 720×720, anchored top ──
-  const photo = imgs.photo || cityPhotos[city.file] || null;
+  const photo = imgs.photo || null;
   if (photo) {
     const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
     const pw = photo.naturalWidth  * scale;
@@ -482,7 +364,7 @@ function drawGraphic(canvas, city, imgs = {}) {
   }
 
   // badge — bottom-right, with white pill (capped in both dimensions)
-  const badge = imgs.badge || badgeImages[city.file] || null;
+  const badge = imgs.badge || null;
   if (badge) {
     const bw    = badge.naturalWidth  || badge.width;
     const bh    = badge.naturalHeight || badge.height;
@@ -515,117 +397,10 @@ function drawGraphic(canvas, city, imgs = {}) {
   }
 }
 
-// ─── build UI cards ──────────────────────────────────────────────────────────
-function buildCards() {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-
-  CITIES.forEach(city => {
-    const badgeLoaded = badgeImages[city.file] !== null && badgeImages[city.file] !== undefined;
-    const badgeFound  = badgeImages[city.file] instanceof HTMLImageElement;
-
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-header">
-        <span class="card-city">${city.name}</span>
-        <span class="badge-pill ${badgeFound ? 'ok' : 'missing'}">
-          ${badgeFound ? '✓ Badge loaded' : '⚠ Badge missing'}
-        </span>
-      </div>
-      <canvas id="canvas-${city.file}" width="720" height="720"
-              title="Click to download"
-              onclick="exportSingle('${city.file}', '${city.name}')"></canvas>
-      <button class="btn-single" onclick="exportSingle('${city.file}', '${city.name}')">
-        Download PNG — ${city.name}
-      </button>
-    `;
-    grid.appendChild(card);
-
-    // render preview
-    const cvs = document.getElementById(`canvas-${city.file}`);
-    drawGraphic(cvs, city);
-  });
-}
-
-// ─── export helpers ──────────────────────────────────────────────────────────
-function exportSingle(file, name) {
-  const offscreen = document.getElementById('offscreen');
-  const city = CITIES.find(c => c.file === file);
-  drawGraphic(offscreen, city);
-  const link = document.createElement('a');
-  link.download = `chamber-${file}.png`;
-  link.href = offscreen.toDataURL('image/png');
-  link.click();
-}
-
-async function exportAll() {
-  const btn  = document.getElementById('exportAll');
-  const wrap = document.getElementById('progressWrap');
-  const bar  = document.getElementById('progressBar');
-  const txt  = document.getElementById('progressText');
-
-  btn.disabled = true;
-  wrap.classList.add('visible');
-
-  const offscreen = document.getElementById('offscreen');
-
-  for (let i = 0; i < CITIES.length; i++) {
-    const city = CITIES[i];
-    drawGraphic(offscreen, city);
-
-    await new Promise(resolve => setTimeout(resolve, 80)); // let canvas settle
-
-    const link = document.createElement('a');
-    link.download = `chamber-${city.file}.png`;
-    link.href = offscreen.toDataURL('image/png');
-    link.click();
-
-    bar.style.width = `${((i + 1) / CITIES.length) * 100}%`;
-    txt.textContent = `${i + 1} / ${CITIES.length}`;
-
-    await new Promise(resolve => setTimeout(resolve, 300));
-  }
-
-  btn.disabled = false;
-  setTimeout(() => {
-    wrap.classList.remove('visible');
-    bar.style.width = '0%';
-  }, 2000);
-}
-
 // ─── init ─────────────────────────────────────────────────────────────────────
 async function init() {
   await document.fonts.ready;
-
-  const [logo, logoV, texTR, texBL] = await Promise.all([
-    loadImage('assets/ara-logo-white.png'),
-    loadImage('assets/ara-vertical-white.png'),
-    loadImage('assets/texture-top-right.png'),
-    loadImage('assets/texture-bottom-left.png'),
-  ]);
-  sharedAssets = { logo, logoV, texTR, texBL };
-
-  // load each city's photo
-  await Promise.all(CITIES.map(city =>
-    loadImage(city.photo).then(img => { cityPhotos[city.file] = img; })
-  ));
-
-  const badgeLoads = CITIES.map(city =>
-    loadImage(`badges/${city.file}.${city.ext}`).then(img => {
-      badgeImages[city.file] = img;
-    })
-  );
-  await Promise.all(badgeLoads);
-
-  const loaded  = CITIES.filter(c => badgeImages[c.file] instanceof HTMLImageElement).length;
-  const missing = CITIES.length - loaded;
-  const bar = document.getElementById('statusBar');
-  bar.innerHTML = missing === 0
-    ? `<span class="ok">✓ All ${loaded} badges loaded</span>`
-    : `<span class="ok">${loaded} badges loaded</span> · <span class="missing">${missing} missing — add to badges/ folder</span>`;
-
-  buildCards();
+  sharedAssets.logoV = await loadImage('assets/ara-vertical-white.png');
 }
 
 init();
